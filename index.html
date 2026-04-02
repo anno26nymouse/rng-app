@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Entropy Number Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h2 {
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        #number-display {
+            font-size: 5.5rem;
+            font-weight: 800;
+            margin: 1rem 0;
+            color: var(--accent-color);
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+            min-height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: #064e3b;
+            border: none;
+            padding: 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .history-section {
+            margin-top: 2rem;
+            text-align: left;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1.5rem;
+        }
+
+        .history-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 0;
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: rgba(255,255,255,0.05);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            border: 1px solid rgba(255,255,255,0.05);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #history-list::-webkit-scrollbar { width: 4px; }
+        #history-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>GENERATOR ANGKA ACAK</h2>
+    <div id="number-display">----</div>
+    
+    <button onclick="generateNumber()">Klik untuk Generate</button>
+
+    <div class="history-section">
+        <div class="history-title">
+            <span>RIWAYAT</span>
+            <span id="counter-text">Total: 0</span>
+        </div>
+        <div id="history-list"></div>
+    </div>
+</div>
+
+<script>
+    let count = 0;
+
+    // 🔥 PERFECT RANDOM (NO BIAS)
+    function generateFairRandom(max) {
+        const array = new Uint32Array(1);
+        const maxUint32 = 0xFFFFFFFF;
+        const limit = maxUint32 - (maxUint32 % max);
+
+        let rand;
+        do {
+            window.crypto.getRandomValues(array);
+            rand = array[0];
+        } while (rand >= limit);
+
+        return (rand % max) + 1;
+    }
+
+    function generateNumber() {
+        const randomNumber = generateFairRandom(9999);
+
+        const display = document.getElementById('number-display');
+
+        let iterations = 0;
+        const interval = setInterval(() => {
+            display.innerText = Math.floor(Math.random() * 9999) + 1;
+            iterations++;
+            
+            if (iterations > 12) {
+                clearInterval(interval);
+                display.innerText = randomNumber;
+                addToHistory(randomNumber);
+            }
+        }, 30);
+    }
+
+    function addToHistory(num) {
+        count++;
+        const historyList = document.getElementById('history-list');
+        const counterText = document.getElementById('counter-text');
+
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerText = num;
+
+        historyList.insertBefore(item, historyList.firstChild);
+        counterText.innerText = `Total: ${count}`;
+    }
+</script>
+
+</body>
+</html>
