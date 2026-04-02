@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <link rel="manifest" href="manifest.json">
+ <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f172a">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="Generator angka acak dengan high entropy">
     <title>High-Entropy Number Generator</title>
     <style>
         :root {
@@ -127,23 +131,80 @@
 
         #history-list::-webkit-scrollbar { width: 4px; }
         #history-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        #splash {
+  #splash {
     position: fixed;
     width: 100%;
     height: 100%;
     background: #0f172a;
-    color: #10b981;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
     z-index: 9999;
+}
+
+/* container */
+.splash-content {
+    text-align: center;
+}
+
+/* LOGO SCALE + FADE */
+.logo {
+    width: 90px;
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: scale(0.5);
+    animation: logoIn 0.8s ease forwards;
+}
+
+/* TEXT RNG (style game) */
+.title {
+    color: #10b981;
+    font-size: 2rem;
+    letter-spacing: 6px;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+/* Animasi logo */
+@keyframes logoIn {
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Animasi teks muncul (kayak Mobile Legends vibe) */
+.title.show {
+    animation: textReveal 0.8s ease forwards, glowPulse 1.5s ease infinite;
+}
+
+@keyframes textReveal {
+    from {
+        opacity: 0;
+        letter-spacing: 20px;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        letter-spacing: 6px;
+        transform: translateY(0);
+    }
+}
+
+/* Glow ala game */
+@keyframes glowPulse {
+    0% { text-shadow: 0 0 5px #10b981; }
+    50% { text-shadow: 0 0 20px #10b981, 0 0 40px #10b981; }
+    100% { text-shadow: 0 0 5px #10b981; }
 }
     </style>
 </head>
 <body>
   <div id="splash">
-  <h1>RNG</h1>
+  <div class="splash-content">
+    <img src="icon-192.png" class="logo">
+    <h1 class="title" id="rng-text">RNG</h1>
+  </div>
 </div>
 
 <div class="container">
@@ -162,60 +223,98 @@
 </div>
 <script>
 window.addEventListener("load", () => {
+    const splash = document.getElementById("splash");
+    const text = document.getElementById("rng-text");
+
+    // Step 1: tunggu logo muncul dulu
     setTimeout(() => {
-        document.getElementById("splash").style.display = "none";
-    }, 1000);
+        text.classList.add("show");
+    }, 700);
+
+    // Step 2: hilangkan splash
+    setTimeout(() => {
+        splash.style.opacity = "0";
+        splash.style.transition = "opacity 0.5s ease";
+
+        setTimeout(() => {
+            splash.style.display = "none";
+        }, 500);
+    }, 2000);
 });
-    let count = 0;
 
-    // 🔥 PERFECT RANDOM (NO BIAS)
-    function generateFairRandom(max) {
-        const array = new Uint32Array(1);
-        const maxUint32 = 0xFFFFFFFF;
-        const limit = maxUint32 - (maxUint32 % max);
 
-        let rand;
-        do {
-            window.crypto.getRandomValues(array);
-            rand = array[0];
-        } while (rand >= limit);
+window.addEventListener("load", () => {
+    const splash = document.getElementById("splash");
 
-        return (rand % max) + 1;
-    }
+    // Fade out splash
+    setTimeout(() => {
+        splash.style.opacity = "0";
+        splash.style.transition = "opacity 0.5s ease";
+        
+        setTimeout(() => {
+            splash.style.display = "none";
+        }, 500);
+    }, 800);
+});
 
-    function generateNumber() {
-        const randomNumber = generateFairRandom(9999);
+let count = 0;
 
-        const display = document.getElementById('number-display');
+// 🔥 PERFECT RANDOM (NO BIAS)
+function generateFairRandom(max) {
+    const array = new Uint32Array(1);
+    const maxUint32 = 0xFFFFFFFF;
+    const limit = maxUint32 - (maxUint32 % max);
 
-        let iterations = 0;
-        const interval = setInterval(() => {
-            display.innerText = Math.floor(Math.random() * 9999) + 1;
-            iterations++;
-            
-            if (iterations > 12) {
-                clearInterval(interval);
-                display.innerText = randomNumber;
-                addToHistory(randomNumber);
-            }
-        }, 30);
-    }
+    let rand;
+    do {
+        window.crypto.getRandomValues(array);
+        rand = array[0];
+    } while (rand >= limit);
 
-    function addToHistory(num) {
-        count++;
-        const historyList = document.getElementById('history-list');
-        const counterText = document.getElementById('counter-text');
+    return (rand % max) + 1;
+}
 
-        const item = document.createElement('div');
-        item.className = 'history-item';
-        item.innerText = num;
+function generateNumber() {
+    const randomNumber = generateFairRandom(9999);
+    const display = document.getElementById('number-display');
 
-        historyList.insertBefore(item, historyList.firstChild);
-        counterText.innerText = `Total: ${count}`;
-    }
+    let iterations = 0;
+    const interval = setInterval(() => {
+        display.innerText = Math.floor(Math.random() * 9999) + 1;
+        iterations++;
 
+        if (iterations > 12) {
+            clearInterval(interval);
+            display.innerText = randomNumber;
+            addToHistory(randomNumber);
+        }
+    }, 30);
+}
+
+function addToHistory(num) {
+    count++;
+    const historyList = document.getElementById('history-list');
+    const counterText = document.getElementById('counter-text');
+
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerText = num;
+
+    historyList.insertBefore(item, historyList.firstChild);
+    counterText.innerText = `Total: ${count}`;
+}
+
+// 🔥 REGISTER SERVICE WORKER (LEBIH AMAN)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+        .then(() => {
+            console.log('Service Worker berhasil terdaftar');
+        })
+        .catch(err => {
+            console.log('Service Worker gagal:', err);
+        });
+    });
 }
 </script>
 </body>
